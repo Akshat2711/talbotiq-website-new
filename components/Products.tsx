@@ -2,11 +2,8 @@
 
 import React, { useState, useEffect, useRef } from 'react';
 import { motion, useInView } from 'framer-motion';
-import { 
-  Sparkles, Bot, Cpu, Users, FileText, Video, 
-  Target, TrendingUp, CheckSquare, Cctv 
-} from 'lucide-react';
-import ScrollStack, { ScrollStackItem } from '@/helper/ScrollstackAnimation'; // Update import path as needed
+import { Sparkles, Cpu } from 'lucide-react';
+import CircularGallery from '@/helper/CircularGallery';
 
 interface ScrambleTextProps {
   text: string;
@@ -38,9 +35,7 @@ function ScrambleText({ text, loopInterval = null }: ScrambleTextProps) {
           text
             .split("")
             .map((letter, index) => {
-              if (index < iteration) {
-                return text[index];
-              }
+              if (index < iteration) return text[index];
               if (letter === " ") return " "; 
               return chars[Math.floor(Math.random() * chars.length)];
             })
@@ -48,12 +43,8 @@ function ScrambleText({ text, loopInterval = null }: ScrambleTextProps) {
         );
 
         if (iteration >= text.length) {
-          if (interval !== null) {
-            clearInterval(interval);
-          }
-          if (loopInterval) {
-            loopTimeout = setTimeout(runScramble, loopInterval);
-          }
+          if (interval !== null) clearInterval(interval);
+          if (loopInterval) loopTimeout = setTimeout(runScramble, loopInterval);
         }
         iteration += 1 / 2;
       }, 30); 
@@ -62,120 +53,198 @@ function ScrambleText({ text, loopInterval = null }: ScrambleTextProps) {
     runScramble();
 
     return () => {
-      if (interval !== null) {
-        clearInterval(interval);
-      }
-      if (loopTimeout !== null) {
-        clearTimeout(loopTimeout);
-      }
+      if (interval !== null) clearInterval(interval);
+      if (loopTimeout !== null) clearTimeout(loopTimeout);
     };
   }, [text, isInView, loopInterval]);
 
   return <span ref={ref}>{displayText}</span>;
 }
 
-// --- Mocked Product Data with Rich Colored Backgrounds ---
+// --- Helper to convert HEX to RGB for Canvas gradients ---
+const hexToRgb = (hex: string) => {
+  const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+  return result 
+    ? `${parseInt(result[1], 16)}, ${parseInt(result[2], 16)}, ${parseInt(result[3], 16)}` 
+    : '0,0,0';
+};
+
+// --- Mocked Product Data with Colors and Relevant Images ---
 const stackedProducts = [
   {
     id: "virtual-recruiter",
     category: "AI Agents",
     name: "Virtual Recruiter",
     description: "An autonomous agent that sources, screens, and engages candidates 24/7 without human intervention.",
-    icon: Bot,
-    accent: "text-purple-300",
-    cardBg: "bg-gradient-to-br from-[#2e0854] to-[#16022e]", 
-    bgAccent: "bg-purple-500/30",
-    borderAccent: "border-purple-500/30",
-    mockCode: "agent.deploy({ role: 'Technical Sourcer', pipelines: ['GitHub', 'LinkedIn'] })"
+    mockCode: "agent.deploy({ role: 'Technical Sourcer' })",
+    bgColor: "#2e0854", // Deep Purple
+    accentColor: "#c084fc", // Purple-400
+    // Tech interview / recruiting image
+    imageUrl: "https://images.unsplash.com/photo-1573164713988-8665fc963095?q=80&w=800&auto=format&fit=crop" 
   },
   {
     id: "custom-ai-agents",
     category: "AI Agents",
     name: "Custom Agent Builder",
     description: "Build bespoke agents for any workflow. Connect your data sources and let the LLM handle the reasoning.",
-    icon: Cpu,
-    accent: "text-indigo-300",
-    cardBg: "bg-gradient-to-br from-[#1c1959] to-[#090826]", 
-    bgAccent: "bg-indigo-500/30",
-    borderAccent: "border-indigo-500/30",
-    mockCode: "workflow.trigger('on_data_ingest').run(AnalysisAgent)"
+    mockCode: "workflow.trigger('on_data_ingest').run(Agent)",
+    bgColor: "#1e1b4b", // Deep Indigo
+    accentColor: "#818cf8", // Indigo-400
+    // Nodes / Code image
+    imageUrl: "https://images.unsplash.com/photo-1555949963-ff9fe0c870eb?q=80&w=800&auto=format&fit=crop"
   },
   {
     id: "ats",
     category: "Talent & Team Tools",
     name: "Intelligent ATS",
     description: "Applicant tracking on autopilot. Automatically rank inbound applications based on semantic skill matching.",
-    icon: Users,
-    accent: "text-emerald-300",
-    cardBg: "bg-gradient-to-br from-[#023b2c] to-[#011a13]", 
-    bgAccent: "bg-emerald-500/30",
-    borderAccent: "border-emerald-500/30",
-    mockCode: "candidates.filter(c => c.matchScore > 0.85).moveTo('Interview')"
+    mockCode: "candidates.filter(c => c.score > 0.85)",
+    bgColor: "#022c22", // Deep Emerald
+    accentColor: "#34d399", // Emerald-400
+    // Dashboard / analytics image
+    imageUrl: "https://images.unsplash.com/photo-1551288049-bebda4e38f71?q=80&w=800&auto=format&fit=crop"
   },
   {
     id: "document-parser",
     category: "Talent & Team Tools",
     name: "Document Parser",
     description: "Extract structured JSON data from CVs, PDFs, and unstructured text with near-perfect accuracy.",
-    icon: FileText,
-    accent: "text-teal-300",
-    cardBg: "bg-gradient-to-br from-[#033b3d] to-[#011718]", 
-    bgAccent: "bg-teal-500/30",
-    borderAccent: "border-teal-500/30",
-    mockCode: "const data = await parser.extractJSON(resume_pdf)"
+    mockCode: "const data = await parser.extractJSON(pdf)",
+    bgColor: "#042f2e", // Deep Teal
+    accentColor: "#2dd4bf", // Teal-400
+    // Documents / Parsing image
+    imageUrl: "https://images.unsplash.com/photo-1551288049-bebda4e38f71?q=80&w=800&auto=format&fit=crop"
   },
   {
     id: "video-interview",
-    category: "Talent & Team Tools",
+    category: "Talent Tools",
     name: "AI Video Interviewer",
     description: "Conduct automated preliminary interviews. Analyze sentiment, tone, and technical accuracy in real-time.",
-    icon: Video,
-    accent: "text-amber-300",
-    cardBg: "bg-gradient-to-br from-[#4d2303] to-[#210e01]", 
-    bgAccent: "bg-amber-500/30",
-    borderAccent: "border-amber-500/30",
-    mockCode: "interview.analyze({ sentiment: true, keyword_density: true })"
-  },
-  {
-    id: "sales-crm",
-    category: "Operations & Intelligence",
-    name: "Predictive Sales CRM",
-    description: "A CRM that tells you who to call next. Predictive pipeline management driven by real-time buying signals.",
-    icon: TrendingUp,
-    accent: "text-blue-300",
-    cardBg: "bg-gradient-to-br from-[#072456] to-[#020e26]", 
-    bgAccent: "bg-blue-500/30",
-    borderAccent: "border-blue-500/30",
-    mockCode: "leads.getHighestPropensityToBuy(limit=10)"
+    mockCode: "interview.analyze({ sentiment: true })",
+    bgColor: "#451a03", // Deep Amber
+    accentColor: "#fbbf24", // Amber-400
+    // Video call image
+    imageUrl: "https://images.unsplash.com/photo-1516321497487-e288fb19713f?q=80&w=800&auto=format&fit=crop"
   },
   {
     id: "cctv-analytics",
-    category: "Operations & Intelligence",
+    category: "Security",
     name: "CCTV Analytics",
-    description: "Real-time physical security intelligence. Detect anomalies, track foot traffic, and automate physical alerts.",
-    icon: Cctv,
-    accent: "text-rose-300",
-    cardBg: "bg-gradient-to-br from-[#4d0726] to-[#240110]", 
-    bgAccent: "bg-rose-500/30",
-    borderAccent: "border-rose-500/30",
-    mockCode: "camera_stream.detectAnomalies({ threshold: 'critical' })"
+    description: "Real-time physical security intelligence. Detect anomalies, track foot traffic, and automate alerts.",
+    mockCode: "camera.detectAnomalies({ risk: 'high' })",
+    bgColor: "#4c0519", // Deep Rose
+    accentColor: "#fb7185", // Rose-400
+    // Camera / Security image
+    imageUrl: "https://images.unsplash.com/photo-1557597774-9d273605dfa9?q=80&w=800&auto=format&fit=crop"
   }
 ];
 
 export default function ProductsSection() {
+  const [galleryItems, setGalleryItems] = useState<{ image: string; text: string }[]>([]);
+
+  useEffect(() => {
+    const buildCards = async () => {
+      const items = await Promise.all(stackedProducts.map(async (product) => {
+        const canvas = document.createElement('canvas');
+        canvas.width = 800;
+        canvas.height = 1100;
+        const ctx = canvas.getContext('2d');
+        if (!ctx) return { image: '', text: '' };
+
+        // 1. Draw Solid Background Color
+        ctx.fillStyle = product.bgColor;
+        ctx.fillRect(0, 0, 800, 1100);
+
+        // 2. Load & Draw Relevant Image (Top half)
+        try {
+          const img = new Image();
+          img.crossOrigin = "anonymous"; 
+          img.src = product.imageUrl;
+          
+          await new Promise((resolve, reject) => {
+            img.onload = resolve;
+            img.onerror = reject;
+          });
+          
+          // Draw the image filling the top half
+          ctx.drawImage(img, 0, 0, 800, 550);
+
+          // Blend the image seamlessly into the solid background color
+          const rgbBg = hexToRgb(product.bgColor);
+          const blend = ctx.createLinearGradient(0, 350, 0, 550);
+          blend.addColorStop(0, `rgba(${rgbBg},0)`);
+          blend.addColorStop(1, `rgba(${rgbBg},1)`);
+          
+          ctx.fillStyle = blend;
+          ctx.fillRect(0, 350, 800, 200);
+        } catch (e) {
+          console.warn(`Could not load ref image for ${product.name}`, e);
+        }
+
+        // 3. Draw Category Tag
+        ctx.fillStyle = product.accentColor; 
+        ctx.font = 'bold 24px sans-serif';
+        ctx.fillText(product.category.toUpperCase(), 50, 600);
+
+        // 4. Draw Title
+        ctx.fillStyle = '#ffffff';
+        ctx.font = 'bold 55px sans-serif';
+        ctx.fillText(product.name, 50, 670);
+
+        // 5. Draw Description (with word wrapping)
+        ctx.fillStyle = 'rgba(255, 255, 255, 0.8)'; // Slightly transparent white
+        ctx.font = '30px sans-serif';
+        const words = product.description.split(' ');
+        let line = '';
+        let y = 740;
+        for (let n = 0; n < words.length; n++) {
+            const testLine = line + words[n] + ' ';
+            const metrics = ctx.measureText(testLine);
+            if (metrics.width > 700 && n > 0) {
+                ctx.fillText(line, 50, y);
+                line = words[n] + ' ';
+                y += 42;
+            } else {
+                line = testLine;
+            }
+        }
+        ctx.fillText(line, 50, y);
+
+        // 6. Draw Mock Code Block
+        y += 80;
+        ctx.fillStyle = 'rgba(0,0,0,0.4)'; // Dark glass effect box
+        if (ctx.roundRect) {
+            ctx.beginPath();
+            ctx.roundRect(50, y, 700, 90, 16);
+            ctx.fill();
+        } else {
+            ctx.fillRect(50, y, 700, 90);
+        }
+
+        ctx.fillStyle = product.accentColor;
+        ctx.font = '22px monospace';
+        ctx.fillText(`> ${product.mockCode}`, 80, y + 55);
+
+        return {
+          image: canvas.toDataURL('image/jpeg', 0.85),
+          text: "" // Text is baked directly onto the texture
+        };
+      }));
+
+      setGalleryItems(items);
+    };
+
+    buildCards();
+  }, []);
+
   return (
     <section 
       id="products" 
-      aria-labelledby="products-heading"
-      className="bg-[#09090b] text-white py-12 md:py-16 lg:py-20 w-full font-sans border-t border-white/5 relative overflow-hidden"
+      className="bg-[#09090b] text-white py-12 md:py-16 lg:py-20 w-full font-sans border-t border-white/5 relative"
     >
-      {/* Background Ambient Glow */}
       <div className="absolute top-1/4 left-1/2 -translate-x-1/2 w-[90%] md:w-[80%] h-[500px] bg-[#7000FF]/5 blur-[150px] md:blur-[200px] rounded-full pointer-events-none z-0" />
 
-      {/* --- PADDED WRAPPER FOR HEADERS & BANNER --- */}
       <div className="w-full px-4 sm:px-6 md:px-12 xl:px-24 relative z-10">
-        
-        {/* Section Header */}
         <motion.div 
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
@@ -194,94 +263,25 @@ export default function ProductsSection() {
             Most vendors sell you a CRM or an accounting system. Talbotiq is the whole ecosystem, AI-native from the core.
           </p>
         </motion.div>
-
-        {/* Highlight / ERP Banner */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
-          className="overflow-hidden rounded-2xl sm:rounded-3xl border border-[#34d399]/20 bg-gradient-to-b from-[#34d399]/5 to-white/[0.02] p-6 sm:p-8 md:p-12 shadow-2xl relative"
-        >
-          <div className="absolute top-0 right-0 p-4 sm:p-8 opacity-10 sm:opacity-20 pointer-events-none">
-            <Sparkles className="w-20 h-20 sm:w-32 sm:h-32 text-[#34d399]" />
-          </div>
-          
-          <div className="max-w-3xl relative z-10">
-            <h3 className="text-2xl sm:text-3xl md:text-4xl font-semibold text-white tracking-tight mb-3 md:mb-4 pr-12 sm:pr-0">
-              Talbotiq OS — The central brain of your business.
-            </h3>
-            <p className="text-sm sm:text-base md:text-lg text-neutral-400 mb-5 md:mb-6 leading-relaxed">
-              Our unified ERP eliminates data silos by acting as the foundational reasoning engine for all connected micro-agents and tools below.
-            </p>
-            <p className="inline-flex items-center gap-1.5 sm:gap-2 text-[10px] sm:text-xs font-mono text-neutral-400 sm:text-neutral-500 bg-black/50 px-2.5 sm:px-3 py-1.5 rounded">
-              <Cpu className="h-3 w-3 sm:h-4 sm:w-4 text-[#34d399]" />
-              AI-native · Fast + Large Context
-            </p>
-          </div>
-        </motion.div>
       </div>
 
-      {/* --- FULL BLEED / EDGE-TO-EDGE BREAKOUT WRAPPER --- */}
-      {/* w-[100vw] ml-[calc(50%-50vw)] breaks out of ALL parent padding exactly to the viewport edges on mobile */}
-      <div className="w-[100vw] ml-[calc(50%-50vw)] sm:w-full sm:ml-0 mt-12 md:mt-20 px-0 sm:px-6 md:px-12 xl:px-24 relative z-10 overflow-hidden sm:overflow-visible">
-        <ScrollStack 
-          useWindowScroll={true} 
-          itemDistance={120} 
-          itemScale={0.04}
-          stackPosition="25%"
-        >
-          {stackedProducts.map((product, idx) => {
-            const Icon = product.icon;
-            return (
-              <ScrollStackItem 
-                key={product.id}
-                itemClassName="!h-auto !p-0 !bg-transparent !shadow-none !border-none !my-0 w-full"
-              >
-                {/* 
-                  Dynamic Colored Background Applied Here.
-                  - border-x-0 ensures no left/right borders are visible on mobile.
-                  - min-h-[450px] ensures it grows significantly larger on big screens. 
-                */}
-                <div className={`w-full ${product.cardBg} border-y sm:border border-x-0 ${product.borderAccent} rounded-none sm:rounded-[2rem] md:rounded-[3rem] p-6 sm:p-8 md:p-12 lg:p-16 shadow-[0_20px_40px_-15px_rgba(0,0,0,0.8)] flex flex-col lg:flex-row gap-8 sm:gap-8 lg:gap-10 items-start lg:items-center justify-center overflow-hidden relative min-h-[450px] md:min-h-[500px] lg:min-h-[650px] xl:min-h-[750px]`}>
-                  
-                  {/* Background Graphic / Glow */}
-                  <div className={`absolute top-0 right-0 w-64 h-64 md:w-96 md:h-96 ${product.bgAccent} blur-[80px] md:blur-[120px] rounded-full pointer-events-none transform translate-x-1/3 -translate-y-1/3 md:translate-x-1/2 md:-translate-y-1/2 opacity-60`} />
-
-                  {/* Content Left */}
-                  <div className="flex-1 relative z-10 w-full flex flex-col justify-center">
-                    <p className={`text-[10px] sm:text-xs font-bold uppercase tracking-[0.15em] sm:tracking-[0.2em] ${product.accent} mb-3 sm:mb-4`}>
-                      {product.category}
-                    </p>
-                    <h3 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-medium tracking-tight text-white mb-3 sm:mb-4 md:mb-6">
-                      {product.name}
-                    </h3>
-                    <p className="text-sm sm:text-base md:text-xl lg:text-2xl text-white/70 leading-relaxed mb-6 sm:mb-8 max-w-2xl">
-                      {product.description}
-                    </p>
-                    
-                    {/* Code Mockup Block */}
-                    <div className="bg-black/40 backdrop-blur-md border border-white/10 rounded-lg p-3 sm:p-4 font-mono text-[10px] sm:text-xs md:text-sm text-neutral-300 w-full sm:w-fit shadow-inner break-words sm:break-normal">
-                      <span className="text-neutral-500 select-none mr-2 sm:mr-3">{'>'}</span>
-                      <span className={product.accent}>{product.mockCode.split('(')[0]}</span>
-                      <span className="text-white break-all sm:break-normal">({product.mockCode.split('(').slice(1).join('(')}</span>
-                    </div>
-                  </div>
-
-                  {/* Visual Right */}
-                  <div className="w-full lg:w-1/3 flex justify-center items-center relative z-10 mt-2 sm:mt-8 lg:mt-0">
-                    <div className="w-28 h-28 sm:w-32 sm:h-32 md:w-48 md:h-48 lg:w-64 lg:h-64 rounded-2xl md:rounded-3xl bg-white/5 border border-white/10 flex items-center justify-center transform rotate-3 shadow-[0_15px_30px_rgba(0,0,0,0.4)] backdrop-blur-xl transition-transform hover:rotate-6 hover:scale-105 duration-300">
-                      <Icon className={`w-14 h-14 sm:w-16 sm:h-16 md:w-24 md:h-24 lg:w-32 lg:h-32 ${product.accent}`} strokeWidth={1} />
-                    </div>
-                  </div>
-
-                </div>
-              </ScrollStackItem>
-            );
-          })}
-        </ScrollStack>
+      <div className="w-[100vw] ml-[calc(50%-50vw)] sm:w-full sm:ml-0 relative z-50 mt-4 md:mt-12">
+        <div style={{ height: '1000px', position: 'relative' }} className="w-full">
+          {galleryItems.length === 0 ? (
+            <div className="w-full h-full flex items-center justify-center text-white/50 animate-pulse font-mono">
+              [ Generating Interfaces... ]
+            </div>
+          ) : (
+            <CircularGallery
+              items={galleryItems}
+              bend={3}
+              textColor="#ffffff"
+              borderRadius={0.05}
+              scrollEase={0.05}
+            />
+          )}
+        </div>
       </div>
-
     </section>
   );
 }

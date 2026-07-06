@@ -5,7 +5,7 @@ import { motion } from 'framer-motion';
 import { AppWindow, Bot, Cpu, ShieldCheck } from "lucide-react";
 import CardSwap, { Card } from '@/helper/CardSwap';
 
-// Mocked service data combining your custom HOOKS and ICONS
+// Mocked service data combining your custom HOOKS, ICONS, and newly added solid backgrounds
 const servicesData = [
   {
     id: "build-custom-agents",
@@ -14,8 +14,9 @@ const servicesData = [
     description: "We engineer bespoke LLM-driven agents that integrate directly into your workflows, automating complex multi-step tasks unique to your business operations.",
     icon: Bot,
     accent: "text-purple-400",
-    bgAccent: "bg-purple-500/10",
-    borderAccent: "border-purple-500/20"
+    bgAccent: "bg-purple-500/20",
+    borderAccent: "border-purple-500/30",
+    cardBg: "bg-[#170a29]" // Solid dark purple
   },
   {
     id: "build-ai-applications",
@@ -24,8 +25,9 @@ const servicesData = [
     description: "Full-stack development of AI-native software. We build scalable, high-performance applications with intelligent reasoning features baked in from day one.",
     icon: AppWindow,
     accent: "text-emerald-400",
-    bgAccent: "bg-emerald-500/10",
-    borderAccent: "border-emerald-500/20"
+    bgAccent: "bg-emerald-500/20",
+    borderAccent: "border-emerald-500/30",
+    cardBg: "bg-[#042016]" // Solid dark emerald
   },
   {
     id: "secure-ai-in-a-box",
@@ -34,8 +36,9 @@ const servicesData = [
     description: "Enterprise-grade, on-premise AI deployments. We package and deliver powerful local models that run entirely within your secure, air-gapped infrastructure.",
     icon: ShieldCheck,
     accent: "text-blue-400",
-    bgAccent: "bg-blue-500/10",
-    borderAccent: "border-blue-500/20"
+    bgAccent: "bg-blue-500/20",
+    borderAccent: "border-blue-500/30",
+    cardBg: "bg-[#07182e]" // Solid dark blue
   },
   {
     id: "embedded-edge-ai",
@@ -44,8 +47,9 @@ const servicesData = [
     description: "Deploying lightweight, highly-optimized neural networks directly onto edge devices for real-time processing without cloud dependency or latency.",
     icon: Cpu,
     accent: "text-yellow-400",
-    bgAccent: "bg-yellow-500/10",
-    borderAccent: "border-yellow-500/20"
+    bgAccent: "bg-yellow-500/20",
+    borderAccent: "border-yellow-500/30",
+    cardBg: "bg-[#261a04]" // Solid dark yellow
   },
 ];
 
@@ -54,9 +58,9 @@ export default function ServicesSection() {
     <section
       id="services"
       aria-labelledby="services-heading"
-      className="bg-[#09090b] text-white py-16 md:py-20 overflow-hidden w-full font-sans border-t border-white/5 relative"
+      className="bg-[#09090b] text-white py-16 md:py-24 overflow-hidden w-full font-sans border-t border-white/5 relative"
     >
-      <div className="w-full px-6 md:px-12 xl:px-24 flex flex-col lg:flex-row gap-12 lg:gap-8 items-center min-h-[520px]">
+      <div className="w-full px-6 md:px-12 xl:px-24 flex flex-col lg:flex-row gap-16 lg:gap-8 items-center min-h-[600px]">
         
         {/* Left Column: Text Content */}
         <div className="flex-1 w-full lg:max-w-xl z-20">
@@ -80,25 +84,26 @@ export default function ServicesSection() {
               When off-the-shelf isn't enough, our team designs and ships the AI itself — securely, and close to where your work happens.
             </p>
             
-            <a href="#contact" className="inline-flex items-center justify-center px-6 py-3 rounded-md bg-white text-black font-medium hover:bg-neutral-200 transition-colors">
+            <a href="#contact" className="inline-flex items-center justify-center px-8 py-4 rounded-md bg-white text-black font-medium hover:bg-neutral-200 transition-colors shadow-lg hover:shadow-white/20">
               Discuss a custom project
             </a>
           </motion.div>
         </div>
 
         {/* Right Column: 3D Card Swap Animation */}
-        <div className="flex-1 w-full relative h-[500px] md:h-[600px] lg:h-[700px] flex items-center justify-center lg:justify-end">
+        <div className="flex-1 w-full relative h-[600px] md:h-[700px] flex items-center justify-center lg:justify-end">
           
           {/* Subtle glow behind the cards */}
-          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-64 h-64 bg-[#7000FF]/20 blur-[100px] rounded-full pointer-events-none z-0" />
+          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-80 h-80 bg-[#7000FF]/15 blur-[120px] rounded-full pointer-events-none z-0" />
           
-          <div className="relative w-full h-full max-w-[500px]">
+          {/* Increased max-width container to fit larger cards */}
+          <div className="relative w-full h-full max-w-[650px] mt-12 lg:mt-0">
             <CardSwap
-              width={450}
-              height={350}
-              cardDistance={40}
-              verticalDistance={40}
-              delay={4000} // Swaps every 4 seconds
+              width={520}       // Increased width
+              height={420}      // Increased height
+              cardDistance={50} // Slightly more spread
+              verticalDistance={50}
+              delay={2000}      // Faster swap (2 seconds)
               pauseOnHover={true}
               easing="elastic"
             >
@@ -107,23 +112,24 @@ export default function ServicesSection() {
                 return (
                   <Card 
                     key={service.id}
-                    customClass="p-8 md:p-10 flex flex-col justify-between bg-[#121212] border-white/10 hover:border-white/20 transition-colors shadow-[0_20px_50px_rgba(0,0,0,0.5)] cursor-pointer group"
+                    // Applied specific background color, rounded corners, and larger padding
+                    customClass={`p-10 md:p-12 flex flex-col justify-between rounded-3xl ${service.cardBg} border border-white/10 hover:border-white/25 transition-colors shadow-[0_30px_60px_rgba(0,0,0,0.6)] cursor-pointer group`}
                   >
                     {/* Card Header & Icon */}
                     <div>
-                      <div className={`inline-flex h-12 w-12 items-center justify-center rounded-xl border ${service.borderAccent} ${service.bgAccent} ${service.accent} mb-6 transform group-hover:scale-110 transition-transform duration-300`}>
-                        <Icon className="h-6 w-6" aria-hidden="true" />
+                      <div className={`inline-flex h-16 w-16 items-center justify-center rounded-2xl border ${service.borderAccent} ${service.bgAccent} ${service.accent} mb-8 transform group-hover:scale-110 transition-transform duration-300 shadow-inner`}>
+                        <Icon className="h-8 w-8" aria-hidden="true" />
                       </div>
-                      <h3 className="text-2xl font-semibold text-white tracking-tight mb-2">
+                      <h3 className="text-3xl font-semibold text-white tracking-tight mb-3">
                         {service.name}
                       </h3>
-                      <p className={`font-medium ${service.accent} mb-4 text-sm`}>
+                      <p className={`font-medium ${service.accent} mb-6 text-base`}>
                         {service.hook}
                       </p>
                     </div>
 
                     {/* Card Body */}
-                    <p className="text-neutral-400 text-sm md:text-base leading-relaxed">
+                    <p className="text-neutral-300 text-base md:text-lg leading-relaxed">
                       {service.description}
                     </p>
                   </Card>
